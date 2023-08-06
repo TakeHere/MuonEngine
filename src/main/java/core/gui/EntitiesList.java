@@ -17,7 +17,7 @@ public class EntitiesList {
     public static int imageId = -1;
 
     public static void update(){
-        if (Consts.DEBUG){
+        if (Consts.EDITOR){
             List<String> gameObjectsNames = new ArrayList<>();
             synchronized (GameObject.gameObjects){
                 for (GameObject gameObject : GameObject.gameObjects) {
@@ -29,7 +29,7 @@ public class EntitiesList {
             ImGui.setNextWindowCollapsed(true, ImGuiCond.Once);
 
             ImGui.begin("Gameobjects list", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize);
-            ImGui.setWindowPos(Consts.GUI_OFFSET,Consts.GUI_OFFSET);
+            //ImGui.setWindowPos(Consts.GUI_OFFSET,Consts.GUI_OFFSET, ImGuiCond.Once);
 
             if (imageId != -1)
                 ImGui.imageButton(imageId, 500,500);

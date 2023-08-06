@@ -1,27 +1,16 @@
 package core.gui;
 
+import core.Consts;
 import core.Window;
 import core.listeners.KeyListener;
 import core.listeners.MouseListener;
-import core.objects.entities.Camera;
-import core.toolbox.Maths;
-import core.toolbox.Matrixes;
 import imgui.ImGuiIO;
 import imgui.ImGuiStyle;
 import imgui.callback.ImStrConsumer;
 import imgui.callback.ImStrSupplier;
-import imgui.extension.imguizmo.ImGuizmo;
-import imgui.extension.imguizmo.flag.Mode;
-import imgui.extension.imguizmo.flag.Operation;
 import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.internal.ImGui;
-import imgui.type.ImBoolean;
-import org.joml.Matrix4f;
-import org.lwjgl.BufferUtils;
-
-import java.nio.FloatBuffer;
-import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -46,8 +35,9 @@ public class ImGuiLayer {
         // Initialize ImGuiIO config
         final ImGuiIO io = ImGui.getIO();
 
-        io.setIniFilename(null); // We don't want to save .ini file
+        //io.setIniFilename(null); // We don't want to save .ini file
         io.setConfigFlags(ImGuiConfigFlags.NavEnableKeyboard); // Navigation with keyboard
+        io.setConfigFlags(ImGuiConfigFlags.DockingEnable);
         io.setBackendFlags(ImGuiBackendFlags.HasMouseCursors); // Mouse cursors to display while resizing windows etc.
         io.setBackendPlatformName("imgui_java_impl_glfw");
 
@@ -163,6 +153,9 @@ public class ImGuiLayer {
         glfwSetScrollCallback(glfwWindow, (w, xOffset, yOffset) -> {
             io.setMouseWheelH(io.getMouseWheelH() + (float) xOffset);
             io.setMouseWheel(io.getMouseWheel() + (float) yOffset);
+            if(!io.getWantCaptureMouse()){
+                MouseListener.mouseScrollCallback(w, xOffset, yOffset);
+            }
         });
 
         io.setSetClipboardTextFn(new ImStrConsumer() {
@@ -232,42 +225,22 @@ public class ImGuiLayer {
         colors.setColor(ImGuiCol.TitleBgCollapsed, 0.16f, 0.29f, 0.48f, 1.00f);
     }
 
-    private static final float[][] OBJECT_MATRICES = {
-            {
-                    1.f, 0.f, 0.f, 0.f,
-                    0.f, 1.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f,
-                    0.f, 0.f, 0.f, 1.f
-            },
-            {
-                    1.f, 0.f, 0.f, 0.f,
-                    0.f, 1.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f,
-                    2.f, 0.f, 0.f, 1.f
-            },
-            {
-                    1.f, 0.f, 0.f, 0.f,
-                    0.f, 1.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f,
-                    2.f, 0.f, 2.f, 1.f
-            },
-            {
-                    1.f, 0.f, 0.f, 0.f,
-                    0.f, 1.f, 0.f, 0.f,
-                    0.f, 0.f, 1.f, 0.f,
-                    0.f, 0.f, 2.f, 1.f
-            }
-    };
-
-    public void update(float dt, Camera camera) {
+    public void update(float dt) {
         startFrame(dt);
 
         ImGui.newFrame();
 
-        EntitiesList.update();
-        Properties.update();
-        ImGui.render();
+        if (Consts.EDITOR){
+            Dockspace.setupDockspace();
 
+            EntitiesList.update();
+            Properties.update();
+            GameViewWindow.imGui();
+
+            ImGui.end();
+        }
+
+        ImGui.render();
         endFrame();
     }
 

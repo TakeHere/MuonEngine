@@ -2,6 +2,7 @@ package core.objects.entities;
 
 import core.Window;
 import core.listeners.KeyListener;
+import core.listeners.MouseListener;
 import core.toolbox.Maths;
 import core.toolbox.Matrixes;
 import core.toolbox.Vector2;
@@ -33,9 +34,9 @@ public class Camera {
 
     public void update(Player player){
         if (Window.isMouseLocked()){
-            float angleChange = ImGui.getIO().getMouseDeltaX() * 0.3f;
+            float angleChange = MouseListener.getMouseDeltaX() * 0.3f;
             yAngleOffset -= angleChange;
-            float pitchChange = ImGui.getIO().getMouseDeltaY() * 0.3f;
+            float pitchChange = MouseListener.getMouseDeltaY() * 0.3f;
             pitch += pitchChange;
         }
 

@@ -2,6 +2,7 @@ package core;
 
 import core.animations.AnimationsController;
 import core.audio.AudioMaster;
+import core.gui.GameViewWindow;
 import core.gui.ImGuiLayer;
 import core.listeners.KeyListener;
 import core.listeners.MouseListener;
@@ -12,9 +13,10 @@ import core.objects.models.ModelTexture;
 import core.objects.models.RawModel;
 import core.objects.models.TexturedModel;
 import core.objects.models.objloader.OBJFileLoader;
+import core.renderers.FrameBuffer;
 import core.renderers.debug.DebugSphere;
 import core.scenes.Scene;
-import core.scenes.Viewport;
+import core.scenes.BenchmarkScene;
 import core.toolbox.Loader;
 import core.toolbox.RunNextFrame;
 import core.toolbox.Time;
@@ -49,6 +51,8 @@ public class Window {
         this.title = "JavaFPS";
     }
 
+    private FrameBuffer frameBuffer;
+
     public static void changeScene(int newScene){
         GameObject.gameObjects.clear();
 
@@ -63,7 +67,7 @@ public class Window {
 
         switch (newScene){
             case 0:
-                currentScene = new Viewport();
+                currentScene = new BenchmarkScene();
                 currentScene.init();
                 break;
             default:
@@ -135,6 +139,9 @@ public class Window {
         imGuiLayer.initImGui();
 
         AudioMaster.init();
+
+        if (Consts.EDITOR)
+            this.frameBuffer = new FrameBuffer(width, height);
     }
 
     int fps;
@@ -167,12 +174,36 @@ public class Window {
         changeScene(0);
 
         while (!glfwWindowShouldClose(glfwWindow)) {
+            if (Consts.EDITOR)
+                this.frameBuffer.bind();
+
             glfwPollEvents();
 
+            /*
             if (MouseListener.mouseButtonDown(0) && !ImGui.getIO().getWantCaptureMouse()){
                 glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
                 mouseLocked = true;
             }else if (KeyListener.isKeyPressed(GLFW_KEY_ESCAPE)){
+                glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                mouseLocked = false;
+            }
+             */
+
+            if (MouseListener.mouseButtonDown(0)){
+                if (Consts.EDITOR){
+                    if (GameViewWindow.isIsHovered()){
+                        glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                        mouseLocked = true;
+                    }
+                }else{
+                    if (!ImGui.getIO().getWantCaptureMouse()){
+                        glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                        mouseLocked = true;
+                    }
+                }
+            }
+
+            if (KeyListener.isKeyPressed(GLFW_KEY_ESCAPE)){
                 glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
                 mouseLocked = false;
             }
@@ -202,8 +233,11 @@ public class Window {
                 AnimationsController.playAnimations();
             }
 
+            if (Consts.EDITOR)
+                this.frameBuffer.unbind();
+
             if (dt == 0) dt = 0.001f;
-            this.imGuiLayer.update(dt, currentScene.getCamera());
+            this.imGuiLayer.update(dt);
 
             for (Runnable runnable : RunNextFrame.getRunNextFrame()) {
                 runnable.run();
@@ -228,12 +262,22 @@ public class Window {
         AudioMaster.cleanUp();
         currentScene.cleanup();
         imGuiLayer.destroyImGui();
+
+        System.exit(0);
     }
 
     private static void windowResizeCallback(long window, int width, int height) {
         setWidth(width);
         setHeight(height);
         glViewport(0, 0, width, height);
+    }
+
+    public FrameBuffer getFrameBuffer() {
+        return frameBuffer;
+    }
+
+    public static float getTargetAspectRatio(){
+        return 16.0f/9.0f;
     }
 
     private static void setWidth(int width) {

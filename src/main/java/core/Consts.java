@@ -10,7 +10,6 @@ public class Consts {
     public static final float FAR_PLANE = 10000;
 
     public static final float GRAVITY = -5;
-    public static final float GUI_OFFSET = 10;
 
-    public static boolean DEBUG = true;
+    public static boolean EDITOR = true;
 }

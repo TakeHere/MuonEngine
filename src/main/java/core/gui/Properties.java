@@ -11,7 +11,7 @@ import imgui.type.ImBoolean;
 public class Properties {
 
     public static void update(){
-        if (Consts.DEBUG){
+        if (Consts.EDITOR){
             GameObject currentObject = GameObject.gameObjects.get(EntitiesList.currentObject.get());
 
             String objectName = currentObject.getName();
@@ -27,7 +27,7 @@ public class Properties {
             ImGui.setNextWindowCollapsed(true, ImGuiCond.Once);
 
             ImGui.begin("Properties", new ImBoolean(true), ImGuiWindowFlags.AlwaysAutoResize);
-            ImGui.setWindowPos(Window.getWidth() - ImGui.getWindowSize().x - Consts.GUI_OFFSET, Consts.GUI_OFFSET);
+            //ImGui.setWindowPos(Window.getWidth() - ImGui.getWindowSize().x - Consts.GUI_OFFSET, Consts.GUI_OFFSET, ImGuiCond.Once);
 
             ImGui.labelText("Name", objectName);
 
